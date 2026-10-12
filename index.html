@@ -2644,68 +2644,79 @@ console.log('VAYRO Abandoned Cart Add-on loaded ✓');
 </script>
 <script>
 /* ============================================================
-   VAYRO CART CLOUD SYNC ADD-ON
-   السلة بقت مرتبطة بالحساب (Firestore) مش بالجهاز
+   VAYRO CART CLOUD SYNC — v2
+   السلة مرتبطة بالحساب (Firestore) مش بالجهاز
+   معالجة كاملة لتبديل الحسابات + الضيف + الخفي
    ============================================================ */
 (function(){
-var syncTimer=null,bootedOnce=false;
+var OWNER_KEY='vayro_cart_owner';
+var syncTimer=null;
 
+function getOwner(){try{return localStorage.getItem(OWNER_KEY)||'guest'}catch(e){return 'guest'}}
+function setOwner(v){try{localStorage.setItem(OWNER_KEY,v||'guest')}catch(e){}}
+
+/* ---- كتابة سحابية مع حارس تغيّر المستخدم ---- */
 function writeCloudCart(immediate){
   if(!currentUser)return;
+  var uid=currentUser.uid;
   clearTimeout(syncTimer);
   var doWrite=function(){
-    if(!currentUser)return;
+    if(!currentUser||currentUser.uid!==uid)return;
     try{
-      db.collection('carts').doc(currentUser.uid).set({
-        uid:currentUser.uid,
-        cart:cart,
-        cartTs:Date.now()
-      },{merge:true}).catch(function(e){console.warn('cart cloud write',e)});
+      db.collection('carts').doc(uid).set({uid:uid,cart:cart,cartTs:Date.now()},{merge:true}).catch(function(e){console.warn('cart cloud write',e)});
+      setOwner(uid);
     }catch(e){}
   };
-  if(immediate)doWrite();else syncTimer=setTimeout(doWrite,1500);
+  if(immediate)doWrite();else syncTimer=setTimeout(doWrite,1200);
 }
 
+/* ---- تحميل سلة الحساب عند تسجيل الدخول ---- */
 async function loadUserCartFromCloud(){
   if(!currentUser)return;
-  try{
-    var snap=await db.collection('carts').doc(currentUser.uid).get();
-    var cloud=(snap.exists&&Array.isArray(snap.data().cart))?snap.data().cart:null;
-    var localHad=cart.length>0;
-    if(cloud&&cloud.length){
-      cart=cloud;
-    }else if(localHad){
-      /* سلة ضيف → تتنقل جوا الحساب */
-    }else{
-      cart=[];
-    }
-    normalizeCart();
+  var uid=currentUser.uid;
+  var owner=getOwner();
+  /* 1) السلة المحلية بتاعة حساب تاني؟ امسحها فورًا (منع التسريب) */
+  if(owner!==uid&&owner!=='guest'&&cart.length){
+    cart=[];
+    try{localStorage.setItem('vayro_cart','[]')}catch(e){}
     updateCartBadge();
-    if(!cloud||!cloud.length){
-      if(cart.length)writeCloudCart(true);
-    }
-    var cp=document.getElementById('cartPage');
-    if(cp&&cp.classList.contains('active'))renderCart();
-    if(typeof refreshLoyaltyUI==='function'&&document.getElementById('checkoutPage')&&document.getElementById('checkoutPage').classList.contains('active'))refreshLoyaltyUI();
-    bootedOnce=true;
-  }catch(e){console.warn('cloud cart load',e)}
+  }
+  var localHad=cart.length>0;
+  /* 2) اجب سلة الحساب من السحاب */
+  var cloud=null;
+  try{
+    var snap=await db.collection('carts').doc(uid).get();
+    if(snap.exists&&Array.isArray(snap.data().cart))cloud=snap.data().cart;
+  }catch(e){console.warn('cloud cart read',e)}
+  if(!currentUser||currentUser.uid!==uid)return; /* اتغير المستخدم أثناء الجلب */
+  /* 3) الأولوية: سلة السحاب > سلة محلية لنفس الحساب/ضيف > فاضية */
+  if(cloud&&cloud.length){cart=cloud}
+  else if(!localHad){cart=[]}
+  normalizeCart();
+  updateCartBadge();
+  setOwner(uid);
+  if((!cloud||!cloud.length)&&cart.length)writeCloudCart(true); /* ترحيل سلة الضيف أو الكاش المحلي */
+  var cp=document.getElementById('cartPage');
+  if(cp&&cp.classList.contains('active'))renderCart();
 }
 
+/* ---- تسجيل الخروج: تصفير محلي + رجوع الملكية للضيف ---- */
 function clearLocalCartOnLogout(){
+  clearTimeout(syncTimer);
   cart=[];
-  try{localStorage.setItem('vayro_cart','[]')}catch(e){}
+  try{localStorage.setItem('vayro_cart','[]');setOwner('guest')}catch(e){}
   updateCartBadge();
   var cp=document.getElementById('cartPage');
   if(cp&&cp.classList.contains('active'))renderCart();
 }
 
+/* ---- ربط بالكود الأساسي ---- */
 function chain(name,after,flag){if(window[flag])return;var orig=window[name];if(typeof orig!=='function')return;window[name]=async function(){var r=await orig.apply(this,arguments);try{await after.apply(null,arguments)}catch(e){}return r};window[flag]=true}
+chain('saveCart',function(){setOwner(currentUser?currentUser.uid:'guest');writeCloudCart(false)},'_cc2Save');
+chain('loadUserData',function(){loadUserCartFromCloud()},'_cc2Load');
+chain('confirmLogout',function(){clearLocalCartOnLogout()},'_cc2Out');
 
-chain('saveCart',function(){writeCloudCart(false)},'_ccSave');
-chain('loadUserData',function(){loadUserCartFromCloud()},'_ccLoad');
-chain('confirmLogout',function(){clearLocalCartOnLogout()},'_ccOut');
-
-console.log('VAYRO Cart Cloud Sync Add-on loaded ✓');
+console.log('VAYRO Cart Cloud Sync v2 loaded ✓');
 })();
 </script>
 </body>
