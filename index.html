@@ -2642,5 +2642,71 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 console.log('VAYRO Abandoned Cart Add-on loaded ✓');
 })();
 </script>
+<script>
+/* ============================================================
+   VAYRO CART CLOUD SYNC ADD-ON
+   السلة بقت مرتبطة بالحساب (Firestore) مش بالجهاز
+   ============================================================ */
+(function(){
+var syncTimer=null,bootedOnce=false;
+
+function writeCloudCart(immediate){
+  if(!currentUser)return;
+  clearTimeout(syncTimer);
+  var doWrite=function(){
+    if(!currentUser)return;
+    try{
+      db.collection('carts').doc(currentUser.uid).set({
+        uid:currentUser.uid,
+        cart:cart,
+        cartTs:Date.now()
+      },{merge:true}).catch(function(e){console.warn('cart cloud write',e)});
+    }catch(e){}
+  };
+  if(immediate)doWrite();else syncTimer=setTimeout(doWrite,1500);
+}
+
+async function loadUserCartFromCloud(){
+  if(!currentUser)return;
+  try{
+    var snap=await db.collection('carts').doc(currentUser.uid).get();
+    var cloud=(snap.exists&&Array.isArray(snap.data().cart))?snap.data().cart:null;
+    var localHad=cart.length>0;
+    if(cloud&&cloud.length){
+      cart=cloud;
+    }else if(localHad){
+      /* سلة ضيف → تتنقل جوا الحساب */
+    }else{
+      cart=[];
+    }
+    normalizeCart();
+    updateCartBadge();
+    if(!cloud||!cloud.length){
+      if(cart.length)writeCloudCart(true);
+    }
+    var cp=document.getElementById('cartPage');
+    if(cp&&cp.classList.contains('active'))renderCart();
+    if(typeof refreshLoyaltyUI==='function'&&document.getElementById('checkoutPage')&&document.getElementById('checkoutPage').classList.contains('active'))refreshLoyaltyUI();
+    bootedOnce=true;
+  }catch(e){console.warn('cloud cart load',e)}
+}
+
+function clearLocalCartOnLogout(){
+  cart=[];
+  try{localStorage.setItem('vayro_cart','[]')}catch(e){}
+  updateCartBadge();
+  var cp=document.getElementById('cartPage');
+  if(cp&&cp.classList.contains('active'))renderCart();
+}
+
+function chain(name,after,flag){if(window[flag])return;var orig=window[name];if(typeof orig!=='function')return;window[name]=async function(){var r=await orig.apply(this,arguments);try{await after.apply(null,arguments)}catch(e){}return r};window[flag]=true}
+
+chain('saveCart',function(){writeCloudCart(false)},'_ccSave');
+chain('loadUserData',function(){loadUserCartFromCloud()},'_ccLoad');
+chain('confirmLogout',function(){clearLocalCartOnLogout()},'_ccOut');
+
+console.log('VAYRO Cart Cloud Sync Add-on loaded ✓');
+})();
+</script>
 </body>
 </html>
