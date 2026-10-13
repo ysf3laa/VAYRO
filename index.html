@@ -442,6 +442,19 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg-secondary);color:var(-
 .profile-avatar .crown{position:absolute;top:-15px;font-size:1.5rem}
 .profile-name{font-size:1.5rem;font-weight:900;margin-bottom:.3rem}.profile-email{color:var(--text-secondary);font-size:.9rem}
 .loyalty-banner{margin:0 1.5rem 1rem;padding:.9rem 1rem;border-radius:14px;background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.3);display:flex;align-items:center;gap:.7rem}
+.tier-progress-track{width:100%;height:6px;border-radius:4px;background:rgba(255,255,255,.08);margin-top:.5rem;overflow:hidden}
+.tier-progress-fill{height:100%;background:var(--gold);border-radius:4px;transition:.4s}
+.referral-card{margin:0 1.5rem 1rem;padding:1rem;border-radius:14px;background:rgba(212,175,55,.06);border:1px dashed rgba(212,175,55,.4)}
+.referral-card .rc-code-row{display:flex;align-items:center;gap:.6rem;margin-top:.6rem}
+.referral-card .rc-code{flex:1;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:.6rem .8rem;font-weight:900;letter-spacing:1px;text-align:center;color:var(--gold)}
+.referral-card .rc-btn{background:var(--gold);color:var(--bg-primary);border:none;border-radius:10px;padding:.6rem .9rem;cursor:pointer;font-weight:800}
+.cross-sell-row{display:flex;gap:.8rem;overflow-x:auto;padding:0 1.5rem 1rem;scrollbar-width:none}
+.cross-sell-row::-webkit-scrollbar{display:none}
+.cross-sell-card{flex:0 0 130px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:.6rem;text-align:center}
+.cross-sell-card img{width:100%;height:90px;object-fit:cover;border-radius:10px;margin-bottom:.4rem;background:var(--bg-secondary)}
+.cross-sell-card .cs-name{font-size:.75rem;font-weight:700;margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cross-sell-card .cs-price{color:var(--gold);font-weight:900;font-size:.8rem;margin-bottom:.4rem}
+.cross-sell-card button{width:100%;padding:.4rem;background:var(--bg-secondary);border:1px solid var(--gold);color:var(--gold);border-radius:8px;font-size:.72rem;font-weight:800;cursor:pointer}
 .loyalty-banner i{color:var(--gold);font-size:1.3rem}
 .loyalty-banner .lb-title{font-weight:900;font-size:.92rem}
 .loyalty-banner .lb-sub{font-size:.75rem;color:var(--text-secondary)}
@@ -902,9 +915,6 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg-secondary);color:var(-
 .admin-user-item{flex-direction:column;align-items:stretch;gap:0}
 .user-actions{width:100%;display:flex;gap:.5rem;flex-wrap:nowrap;overflow-x:auto;margin-top:.8rem;padding-top:.8rem;border-top:1px dashed rgba(212,175,55,.25)}
 .user-actions .admin-btn-small{flex:1 1 0;min-width:42px;padding:.65rem .4rem;border-radius:10px;font-size:.85rem}
-.admin-order-item{flex-direction:column;align-items:stretch;gap:0}
-.order-actions{width:100%;display:flex;gap:.5rem;flex-wrap:nowrap;overflow-x:auto;margin-top:.8rem;padding-top:.8rem;border-top:1px dashed rgba(212,175,55,.25)}
-.order-actions .admin-btn-small{flex:1 1 0;min-width:42px;padding:.65rem .4rem;border-radius:10px;font-size:.85rem;text-align:center}
 #adminOrdersList .admin-order-item{cursor:pointer}
 #adminOrdersList .admin-order-item:hover{border-color:rgba(212,175,55,.45)}
 .admin-table{width:100%;border-collapse:collapse;margin-top:1rem;background:var(--bg-card);border-radius:12px;overflow:hidden}
@@ -1263,6 +1273,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg-secondary);color:var(-
 <div class="page" id="cartPage">
 <div class="cart-header"><div><h1>سلة التسوق</h1><div class="cart-items-count" id="cartItemsCount">0 منتج</div></div><button class="header-icon-btn" onclick="clearCart()" id="clearCartBtn" style="display:none"><i class="fas fa-trash"></i></button></div>
 <div class="cart-items-list" id="cartItemsList"></div>
+<div id="cartCrossSellSection" style="display:none"></div>
 <div class="cart-summary" id="cartSummary" style="display:none">
 <div class="cart-summary-row"><span>المجموع الفرعي</span><span id="cartSubtotal">0 ج.م</span></div>
 <div class="cart-summary-row" id="cartDiscountRow" style="display:none;color:var(--success)"><span>الخصم</span><span id="cartDiscountAmount">-0 ج.م</span></div>
@@ -1280,6 +1291,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg-secondary);color:var(-
 <div class="page" id="profilePage">
 <div class="profile-header"><div class="profile-avatar"><span class="crown" id="profileCrown" style="display:none">👑</span><span id="profileAvatarText">؟</span></div><div class="profile-name" id="profileName">ضيف</div><div class="profile-email" id="profileEmail">سجل دخولك الآن</div></div>
 <div id="loyaltyBannerSlot"></div>
+<div id="referralCardSlot"></div>
 <div class="profile-menu" id="profileMenu"></div>
 <button class="logout-btn" id="logoutBtn" style="display:none" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
 </div>
@@ -1493,6 +1505,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg-secondary);color:var(-
 <input type="email" class="auth-input" id="authEmail" placeholder="البريد الإلكتروني *" required>
 <input type="password" class="auth-input" id="authPassword" placeholder="كلمة السر *" required>
 <div id="authConfirmField" style="display:none"><input type="password" class="auth-input" id="authConfirmPassword" placeholder="تأكيد كلمة السر"></div>
+<div id="authReferralField" style="display:none"><input type="text" class="auth-input" id="authReferralCode" placeholder="كود دعوة صديق (اختياري)" style="text-transform:uppercase"></div>
 <button type="submit" class="auth-submit" id="authSubmitBtn">دخول</button>
 </form>
 <div class="forgot-link">
@@ -1632,6 +1645,8 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg-secondary);color:var(-
 <button class="admin-tab" onclick="switchAdminTab('orders',this)">الطلبات <span id="newOrdersBadge" style="display:none;background:var(--danger);color:#fff;border-radius:10px;padding:0 .45rem;font-size:.72rem;margin-right:.3rem;font-weight:900">0</span></button>
 <button class="admin-tab" onclick="switchAdminTab('reviews',this)">التقييمات</button>
 <button class="admin-tab" onclick="switchAdminTab('users',this)">المستخدمين</button>
+<button class="admin-tab" onclick="switchAdminTab('referrals',this)">الإحالات</button>
+<button class="admin-tab" onclick="switchAdminTab('giftcards',this)">بطاقات الهدايا</button>
 <button class="admin-tab" onclick="switchAdminTab('discounts',this)">أكواد الخصم</button>
 <button class="admin-tab" onclick="switchAdminTab('shipping',this)">الشحن</button>
 <button class="admin-tab" onclick="switchAdminTab('stats',this)">الإحصائيات</button>
@@ -1715,6 +1730,21 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg-secondary);color:var(-
 
 <div class="tab-content" id="adminReviewsTab"><h4 style="margin-bottom:1rem;color:var(--gold)">التقييمات والمراجعات</h4><div id="adminReviewsList"></div></div>
 <div class="tab-content" id="adminUsersTab"><h4 style="margin-bottom:1rem;color:var(--gold)">المستخدمين المسجلين</h4><div id="adminUsersList"></div></div>
+<div class="tab-content" id="adminReferralsTab">
+<div class="settings-section"><h4><i class="fas fa-user-friends"></i> نظام الإحالة</h4><p style="color:var(--text-secondary);font-size:.85rem;line-height:1.8">كل عميل عنده كود دعوة فريد بيظهر في صفحة حسابه. لما حد يسجل بكود صاحبه، وأول طلب ليه يتسلّم: العميل الجديد ياخد <strong style="color:var(--gold)">100 نقطة ولاء</strong>، وصاحب الدعوة ياخد <strong style="color:var(--gold)">200 نقطة ولاء</strong> تلقائياً.</p></div>
+<div class="stats-grid" id="adminReferralsStats" style="margin-bottom:1rem"></div>
+<h4 style="margin-bottom:1rem;color:var(--gold)">أصحاب أكواد الدعوة</h4>
+<div id="adminReferralsList"></div>
+</div>
+<div class="tab-content" id="adminGiftcardsTab">
+<div class="settings-section"><h4><i class="fas fa-gift"></i> إنشاء بطاقة هدية</h4>
+<div class="admin-form-group"><label>قيمة البطاقة (ج.م) *</label><input type="number" class="admin-input" id="giftCardValue" placeholder="مثال: 200"></div>
+<div class="admin-form-group"><label>اسم المستلم (اختياري)</label><input type="text" class="admin-input" id="giftCardRecipient" placeholder="لتتبعها بس، مش هتظهر للعميل"></div>
+<button class="admin-btn" onclick="generateGiftCard()"><i class="fas fa-plus"></i> إنشاء البطاقة</button>
+</div>
+<h4 style="margin-bottom:1rem;color:var(--gold)">بطاقات الهدايا الحالية</h4>
+<div id="adminGiftCardsList"></div>
+</div>
 
 <div class="tab-content" id="adminDiscountsTab">
 <div class="settings-section"><h4><i class="fas fa-plus"></i> إضافة كود خصم جديد</h4>
@@ -2044,7 +2074,7 @@ async function chunkDeleteDocs(refs){refs=refs||[];for(var i=0;i<refs.length;i+=
 /* ---- data loading ---- */
 async function loadPublicData(){var res=await Promise.all([db.collection('products').get(),db.collection('categories').get(),db.collection('shippingRates').get(),db.collection('discountCodes').get(),db.collection('settings').doc('global').get(),db.collection('reviews').get(),db.collection('bundles').get()]);products=res[0].docs.map(function(x){return Object.assign({id:x.id},x.data())});categories=res[1].docs.map(function(x){return Object.assign({id:x.id},x.data())});shippingRates=res[2].docs.map(function(x){return Object.assign({id:x.id},x.data())});discountCodes=res[3].docs.map(function(x){return Object.assign({id:x.id},x.data())});if(res[4].exists)siteSettings=Object.assign({},siteSettings,res[4].data());if(siteSettings.whatsappEnabled===undefined)siteSettings.whatsappEnabled=true;if(!siteSettings.whatsappNumber)siteSettings.whatsappNumber=STORE_WHATSAPP;FREE_SHIPPING_THRESHOLD=Number(siteSettings.freeShippingThreshold)||0;reviews=res[5].docs.map(function(x){return Object.assign({id:x.id},x.data())});bundles=res[6].docs.map(function(x){return Object.assign({id:x.id},x.data())})}
 async function loadUserData(){if(!currentUser){orders=[];users=[];updateNewOrdersBadge();return}if(isMaster()){var res=await Promise.all([db.collection('orders').get(),db.collection('users').get()]);orders=res[0].docs.map(function(x){return Object.assign({id:x.id},x.data())}).sort(function(a,b){return(b.ts||0)-(a.ts||0)});users=res[1].docs.map(function(x){return Object.assign({id:x.id},x.data())})}else{var o=await db.collection('orders').where('uid','==',currentUser.uid).get();orders=o.docs.map(function(x){return Object.assign({id:x.id},x.data())}).sort(function(a,b){return(b.ts||0)-(a.ts||0)});users=[]}updateNewOrdersBadge()}
-async function loadUserProfile(fbUser){var snap=await db.collection('users').doc(fbUser.uid).get();if(snap.exists)return Object.assign({uid:fbUser.uid,email:fbUser.email},snap.data());var name=isMasterUid(fbUser.uid)?'الماستر':(fbUser.email?fbUser.email.split('@')[0]:'مستخدم');var data={name:name,email:fbUser.email,phone:'',address:'',city:'',createdAt:new Date().toISOString(),blocked:false,loyaltyPoints:0};await db.collection('users').doc(fbUser.uid).set(data);return Object.assign({uid:fbUser.uid,email:fbUser.email},data)}
+async function loadUserProfile(fbUser){var snap=await db.collection('users').doc(fbUser.uid).get();if(snap.exists)return Object.assign({uid:fbUser.uid,email:fbUser.email},snap.data());var name=isMasterUid(fbUser.uid)?'الماستر':(fbUser.email?fbUser.email.split('@')[0]:'مستخدم');var data={name:name,email:fbUser.email,phone:'',address:'',city:'',createdAt:new Date().toISOString(),blocked:false,loyaltyPoints:0};if(typeof genReferralCode==='function')data.referralCode=genReferralCode(fbUser.uid);await db.collection('users').doc(fbUser.uid).set(data);return Object.assign({uid:fbUser.uid,email:fbUser.email},data)}
 function updateNewOrdersBadge(){var el=document.getElementById('newOrdersBadge');if(!el)return;if(!isMaster()){el.style.display='none';return}var n=0,i;for(i=0;i<orders.length;i++)if(orders[i].status==='جديد')n++;el.textContent=n;el.style.display=n>0?'inline-block':'none'}
 async function seedIfEmpty(){if(products.length>0)return;var P=[{id:'1',name:'عطر VAYRO الملكي',category:'Scent',price:950,oldPrice:1200,cost:520,discount:20,images:['https://images.unsplash.com/photo-1541643600914-78b084663031?w=600&h=600&fit=crop&q=80'],primaryImageIndex:0,description:'عطر شرقي فاخر بثبات طويل ورائحة آسرة',colors:['أسود','ذهبي','أحمر'],sizes:[],stock:null},{id:'2',name:'ساعة VAYRO الذهبية',category:'Style',price:1250,oldPrice:1500,cost:800,discount:15,images:['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&h=600&fit=crop&q=80'],primaryImageIndex:0,description:'ساعة أنيقة بتصميم عصري ولمسة ذهبية راقية',colors:['فضي','ذهبي','أسود'],sizes:['40mm','42mm'],stock:null},{id:'3',name:'محفظة جلد VAYRO',category:'Leather',price:680,cost:350,discount:0,images:['https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&h=600&fit=crop&q=80'],primaryImageIndex:0,description:'محفظة جلد طبيعي بخياطة يدوية متينة',colors:['بني','أسود'],sizes:[],stock:null},{id:'4',name:'شمعة VAYRO المعطرة',category:'Home',price:320,cost:150,discount:10,images:['https://images.unsplash.com/photo-1602874801006-1bd94e5a9e6d?w=600&h=600&fit=crop&q=80'],primaryImageIndex:0,description:'شمعة عطرية فاخرة تضيف دفء وأناقة لمنزلك',colors:['أبيض','بيج'],sizes:[],stock:null},{id:'5',name:'علبة هدايا VAYRO',category:'Gifts',price:450,cost:220,discount:0,images:['https://images.unsplash.com/photo-1513885535711-7536047a9424?w=600&h=600&fit=crop&q=80'],primaryImageIndex:0,description:'علبة هدايا أنيقة مناسبة لكل المناسبات',colors:['أسود','ذهبي'],sizes:[],stock:null}];var C=[{id:'1',name:'Style',icon:'fa-shirt',image:'',description:'إكسسوارات وموضة بلمسة عصرية'},{id:'2',name:'Scent',icon:'fa-droplet',image:'',description:'عطور فاخرة بثبات ورائحة آسرة'},{id:'3',name:'Leather',icon:'fa-briefcase',image:'',description:'جلديات طبيعية بجودة عالية'},{id:'4',name:'Home',icon:'fa-couch',image:'',description:'قطع ديكور وشموع لمنزل أنيق'},{id:'5',name:'Gifts',icon:'fa-gift',image:'',description:'هدايا مختارة لكل الأذواق'}];var S=[{id:'1',governorate:'القاهرة',price:50},{id:'2',governorate:'الجيزة',price:50},{id:'3',governorate:'الإسكندرية',price:60},{id:'4',governorate:'الإسماعيلية',price:60}];var D=[{id:'1',code:'VAYRO10',type:'percent',value:10,limit:100,used:0,expiry:'2026-12-31'}];var batch=db.batch();P.forEach(function(p){batch.set(db.collection('products').doc(p.id),p)});C.forEach(function(c){batch.set(db.collection('categories').doc(c.id),c)});S.forEach(function(s){batch.set(db.collection('shippingRates').doc(s.id),s)});D.forEach(function(d){batch.set(db.collection('discountCodes').doc(d.id),d)});batch.set(db.collection('settings').doc('global'),siteSettings);await batch.commit();products=P;categories=C;shippingRates=S;discountCodes=D;showToast('تم تحميل البيانات الافتراضية ✓')}
 /* ---- navigation ---- */
@@ -2105,7 +2135,7 @@ async function placeOrder(){if(!currentUser){showToast('سجّل دخولك ال
 function sendOrderWhatsApp(o){if(!o)o=lastOrder;if(!o)return;var c=o.customer||{},g=o.gift||{},lines=[];lines.push('🛍️ طلب جديد من '+BRAND);lines.push('');lines.push('📋 رقم الطلب: '+o.id);lines.push('📅 التاريخ: '+o.date);lines.push('');lines.push('👤 بيانات العميل:');lines.push('• الاسم: '+(c.name||''));lines.push('• التليفون: '+(c.phone||''));lines.push('• العنوان: '+(c.address||''));lines.push('• المحافظة: '+(c.city||''));if(c.notes)lines.push('• ملاحظات: '+c.notes);if(g&&g.enabled){lines.push('');lines.push('🎁 هذا الطلب هدية'+(g.recipient?' — المستلم: '+g.recipient:''));if(g.message)lines.push('• رسالة البطاقة: "'+g.message+'"')}lines.push('');lines.push('💳 طريقة الدفع: '+(o.paymentName||''));lines.push('');lines.push('📦 المنتجات:');(o.items||[]).forEach(function(i){lines.push('• '+i.name+(i.color?' ('+i.color+')':'')+(i.size?' ['+i.size+']':'')+' ('+i.quantity+'×) = '+((Number(i.finalPrice)||0)*Number(i.quantity)).toFixed(0)+' ج.م')});lines.push('');lines.push('💰 المجموع الفرعي: '+(o.subtotal||0).toFixed(0)+' ج.م');if(o.discount>0)lines.push('🎟️ الخصم: -'+o.discount.toFixed(0)+' ج.م');lines.push('🚚 الشحن: '+(o.shippingFree?'مجاني 🎉':(o.shippingKnown===false?'يُحدد لاحقا (تواصل مع العميل)':((o.shipping||0).toFixed(0)+' ج.م'))));lines.push('');lines.push('✅ الإجمالي النهائي: '+(o.total||0).toFixed(0)+' ج.م');window.open('https://wa.me/'+getWaNumber()+'?text='+encodeURIComponent(lines.join('\n')),'_blank')}
 function finishOrder(){cart=[];appliedDiscount=null;lastOrder=null;saveCart();resetToHome();document.getElementById('checkName').value='';document.getElementById('checkPhone').value='';document.getElementById('checkAddress').value='';document.getElementById('checkCity').value='';document.getElementById('checkCityText').textContent='اختر المحافظة *';document.getElementById('checkCityText').style.color='var(--text-muted)';document.getElementById('checkNotes').value='';document.getElementById('checkCouponInput').value='';document.getElementById('checkCouponMessage').textContent='';var note=document.getElementById('checkShippingNote');if(note)note.classList.remove('show');var gc=document.getElementById('giftEnabled');if(gc)gc.checked=false;var gf=document.getElementById('giftFields');if(gf)gf.classList.remove('show');var gr=document.getElementById('giftRecipient');if(gr)gr.value='';var gm=document.getElementById('giftMessage');if(gm)gm.value='';var lt=document.getElementById('loyaltyToggle');if(lt)lt.checked=false;var lc=document.getElementById('loyaltyControls');if(lc)lc.classList.remove('show')}
 /* ---- profile & sub pages ---- */
-function renderProfile(){var av=document.getElementById('profileAvatarText'),cr=document.getElementById('profileCrown'),nm=document.getElementById('profileName'),em=document.getElementById('profileEmail'),mn=document.getElementById('profileMenu'),lb=document.getElementById('logoutBtn'),slot=document.getElementById('loyaltyBannerSlot');if(slot){if(currentUser&&loyaltyEnabled()&&userPoints()>0){slot.innerHTML='<div class="loyalty-banner"><i class="fas fa-coins"></i><div style="flex:1"><div class="lb-title">رصيدك: '+userPoints()+' نقطة</div><div class="lb-sub">تساوي '+money(userPoints()*loyaltyPointValue())+' خصم على طلبك الجاي — بتتضاف تلقائيا مع كل طلب يتسلم</div></div></div>'}else slot.innerHTML=''}if(currentUser){av.textContent=(currentUser.name||'؟').charAt(0).toUpperCase();nm.innerHTML=esc(currentUser.name)+(isMaster()?' 👑':'');em.textContent=esc(currentUser.email||currentUser.phone||'');cr.style.display=isMaster()?'block':'none';lb.style.display='flex';var uo=orders.filter(function(o){return o.uid===currentUser.uid}),ur=reviews.filter(function(r){return r.userId===currentUser.uid}).length,items=[{icon:'fa-shopping-bag',text:'طلباتي',action:'orders',count:uo.length},{icon:'fa-star',text:'تقييماتي',action:'myReviews',count:ur},{icon:'fa-location-crosshairs',text:'تتبع طلب',action:'tracking',count:null},{icon:'fa-user-edit',text:'تعديل البيانات',action:'editProfile',count:null},{icon:'fa-key',text:'تغيير كلمة السر',action:'changePassword',count:null},{icon:'fa-heart',text:'المفضلة',action:'wishlist',count:wishlist.length},{icon:'fa-map-marker-alt',text:'العناوين',action:'addresses',count:addresses.length},{icon:'fa-book-open',text:'قصتنا',action:'story',count:null},{icon:'fa-scale-balanced',text:'السياسات',action:'policies',count:null},{icon:'fa-question-circle',text:'المساعدة والدعم',action:'help',count:null}],html='',i;for(i=0;i<items.length;i++){var item=items[i];html+='<div class="profile-menu-item" data-profile-action="'+item.action+'"><i class="fas '+item.icon+'"></i><div class="profile-menu-item-text">'+item.text+'</div>';if(item.count!==null&&item.count!==undefined)html+='<span class="badge-count">'+item.count+'</span>';html+='<i class="fas fa-chevron-left"></i></div>'}mn.innerHTML=html}else{av.textContent='؟';nm.textContent='ضيف';em.textContent='سجل دخولك الآن';cr.style.display='none';lb.style.display='none';var guest=[{icon:'fa-sign-in-alt',text:'تسجيل الدخول',action:'login'},{icon:'fa-user-plus',text:'إنشاء حساب جديد',action:'register'},{icon:'fa-location-crosshairs',text:'تتبع طلب',action:'tracking'},{icon:'fa-book-open',text:'قصتنا',action:'story'},{icon:'fa-scale-balanced',text:'السياسات',action:'policies'}],gh='',j;for(j=0;j<guest.length;j++){var g=guest[j];gh+='<div class="profile-menu-item" data-profile-action="'+g.action+'"><i class="fas '+g.icon+'"></i><div class="profile-menu-item-text">'+g.text+'</div><i class="fas fa-chevron-left"></i></div>'}mn.innerHTML=gh}}
+function renderProfile(){var av=document.getElementById('profileAvatarText'),cr=document.getElementById('profileCrown'),nm=document.getElementById('profileName'),em=document.getElementById('profileEmail'),mn=document.getElementById('profileMenu'),lb=document.getElementById('logoutBtn'),slot=document.getElementById('loyaltyBannerSlot');if(slot){if(currentUser&&loyaltyEnabled()){var pts=userPoints();var tierHtml='';if(typeof currentTier==='function'){var ct=currentTier(pts),nt=nextTier(pts),pct=nt?Math.min(100,Math.round(((pts-ct.min)/(nt.min-ct.min))*100)):100;tierHtml='<div class="lb-title">'+ct.icon+' مستوى '+ct.name+' <span style="color:var(--gold)">| '+pts+' نقطة</span></div><div class="tier-progress-track"><div class="tier-progress-fill" style="width:'+pct+'%"></div></div><div class="lb-sub">'+(nt?('باقي '+(nt.min-pts)+' نقطة لمستوى '+nt.name+' '+nt.icon):'أعلى مستوى عضوية! 👑')+'</div>'}slot.innerHTML='<div class="loyalty-banner"><i class="fas fa-coins"></i><div style="flex:1">'+(tierHtml||('<div class="lb-title">رصيدك: '+pts+' نقطة</div>'))+(tierHtml?'':'<div class="lb-sub">'+(pts>0?('تساوي '+money(pts*loyaltyPointValue())+' خصم على طلبك الجاي'):'بتكسب نقاط مع كل طلب يتسلم')+'</div>')+'</div></div>'}else slot.innerHTML=''}if(currentUser){av.textContent=(currentUser.name||'؟').charAt(0).toUpperCase();nm.innerHTML=esc(currentUser.name)+(isMaster()?' 👑':'');em.textContent=esc(currentUser.email||currentUser.phone||'');cr.style.display=isMaster()?'block':'none';lb.style.display='flex';var uo=orders.filter(function(o){return o.uid===currentUser.uid}),ur=reviews.filter(function(r){return r.userId===currentUser.uid}).length,items=[{icon:'fa-shopping-bag',text:'طلباتي',action:'orders',count:uo.length},{icon:'fa-star',text:'تقييماتي',action:'myReviews',count:ur},{icon:'fa-location-crosshairs',text:'تتبع طلب',action:'tracking',count:null},{icon:'fa-user-edit',text:'تعديل البيانات',action:'editProfile',count:null},{icon:'fa-key',text:'تغيير كلمة السر',action:'changePassword',count:null},{icon:'fa-heart',text:'المفضلة',action:'wishlist',count:wishlist.length},{icon:'fa-map-marker-alt',text:'العناوين',action:'addresses',count:addresses.length},{icon:'fa-book-open',text:'قصتنا',action:'story',count:null},{icon:'fa-scale-balanced',text:'السياسات',action:'policies',count:null},{icon:'fa-question-circle',text:'المساعدة والدعم',action:'help',count:null}],html='',i;for(i=0;i<items.length;i++){var item=items[i];html+='<div class="profile-menu-item" data-profile-action="'+item.action+'"><i class="fas '+item.icon+'"></i><div class="profile-menu-item-text">'+item.text+'</div>';if(item.count!==null&&item.count!==undefined)html+='<span class="badge-count">'+item.count+'</span>';html+='<i class="fas fa-chevron-left"></i></div>'}mn.innerHTML=html}else{av.textContent='؟';nm.textContent='ضيف';em.textContent='سجل دخولك الآن';cr.style.display='none';lb.style.display='none';var guest=[{icon:'fa-sign-in-alt',text:'تسجيل الدخول',action:'login'},{icon:'fa-user-plus',text:'إنشاء حساب جديد',action:'register'},{icon:'fa-location-crosshairs',text:'تتبع طلب',action:'tracking'},{icon:'fa-book-open',text:'قصتنا',action:'story'},{icon:'fa-scale-balanced',text:'السياسات',action:'policies'}],gh='',j;for(j=0;j<guest.length;j++){var g=guest[j];gh+='<div class="profile-menu-item" data-profile-action="'+g.action+'"><i class="fas '+g.icon+'"></i><div class="profile-menu-item-text">'+g.text+'</div><i class="fas fa-chevron-left"></i></div>'}mn.innerHTML=gh}}
 function handleProfileAction(action){if(action==='orders')requireAuth(openOrdersSubPage);else if(action==='myReviews')requireAuth(openMyReviewsSubPage);else if(action==='tracking')openTrackingSubPage();else if(action==='editProfile')requireAuth(openEditProfileSubPage);else if(action==='changePassword')requireAuth(openChangePasswordSubPage);else if(action==='wishlist')requireAuth(openWishlistSubPage);else if(action==='addresses')requireAuth(openAddressesSubPage);else if(action==='story')openStorySubPage();else if(action==='policies')openPoliciesSubPage();else if(action==='help')openHelpSubPage();else if(action==='login')openAuthModal('login');else if(action==='register')openAuthModal('register')}
 function resetOrdersHeader(){document.getElementById('ordersSubTitle').innerHTML='<i class="fas fa-shopping-bag" style="color:var(--gold)"></i> طلباتي'}
 function openOrdersSubPage(){if(!currentUser){requireAuth(openOrdersSubPage);return}resetOrdersHeader();var uo=orders.filter(function(o){return o.uid===currentUser.uid}),c=document.getElementById('ordersSubContent');if(uo.length===0)c.innerHTML='<div class="empty-state"><i class="fas fa-shopping-bag"></i><h3>لا توجد طلبات</h3><p>لم تقم بأي طلبات بعد</p><button type="button" class="empty-btn" data-nav="home">ابدأ التسوق <i class="fas fa-arrow-left"></i></button></div>';else{var html='',i;for(i=0;i<uo.length;i++){var o=uo[i],meta=STAGE_META[o.status]||STAGE_META['جديد'];html+='<div class="order-card reveal" data-order-open="'+esc(o.id)+'"><div class="order-card-header"><div><div class="order-id">'+esc(o.id)+'</div><div class="order-date">'+esc(o.date)+'</div></div><span class="order-status" style="background:'+meta.color+';color:'+(o.status==='جديد'?'var(--bg-primary)':'#fff')+'">'+esc(meta.label)+'</span></div><div class="order-items">';var shown=Math.min(2,(o.items||[]).length),j;for(j=0;j<shown;j++){var it=o.items[j];html+='<div class="order-item-row"><span>'+esc(it.name)+(it.color?' ('+esc(it.color)+')':'')+(it.size?' ['+esc(it.size)+']':'')+' × '+it.quantity+'</span><span>'+((Number(it.finalPrice)||0)*Number(it.quantity)).toFixed(0)+' ج.م</span></div>'}if((o.items||[]).length>2)html+='<div class="order-item-row" style="color:var(--gold)">+ '+((o.items||[]).length-2)+' منتج آخر...</div>';html+='</div><button type="button" class="order-reorder" data-order-reorder="'+esc(o.id)+'"><i class="fas fa-rotate-right"></i> اشترِ مرة أخرى</button><button type="button" class="order-reorder" data-invoice-order="'+esc(o.id)+'"><i class="fas fa-file-pdf"></i> تنزيل الفاتورة PDF</button><button type="button" class="order-reorder" data-print-invoice="'+esc(o.id)+'"><i class="fas fa-print"></i> طباعة الفاتورة</button><div class="order-footer"><div class="order-view-hint">تفاصيل الطلب <i class="fas fa-chevron-left"></i></div><div class="order-total">'+(o.total||0).toFixed(0)+' ج.م</div></div></div>'}c.innerHTML=html}openSubPage('ordersSubPage');observeReveals()}
@@ -2155,10 +2185,10 @@ function filterCities(){renderCityList(document.getElementById('citySearchInput'
 function selectCityTemp(city){selectedCityTemp=city;renderCityList(document.getElementById('citySearchInput').value)}
 function confirmCitySelection(){if(!selectedCityTemp){showToast('يرجى اختيار محافظة');return}if(cityModalTarget==='checkout'){document.getElementById('checkCity').value=selectedCityTemp;document.getElementById('checkCityText').textContent=selectedCityTemp;document.getElementById('checkCityText').style.color='var(--text-primary)';updateCheckoutTotals()}else if(cityModalTarget==='profile'){document.getElementById('editProfileCity').value=selectedCityTemp;document.getElementById('editProfileCityText').textContent=selectedCityTemp;document.getElementById('editProfileCityText').style.color='var(--text-primary)'}else if(cityModalTarget==='address'){document.getElementById('addressCity').value=selectedCityTemp;document.getElementById('addressCityText').textContent=selectedCityTemp;document.getElementById('addressCityText').style.color='var(--text-primary)'}closeLayerProgrammatically()}
 /* ---- auth ---- */
-function setAuthModeUI(mode){authMode=mode;document.getElementById('authTitle').textContent=mode==='login'?'تسجيل الدخول':'إنشاء حساب';document.getElementById('authSubtitle').textContent=mode==='login'?'أدخل إيميلك وكلمة السر':'أدخل بياناتك للتسجيل';document.getElementById('authNameField').style.display=mode==='register'?'block':'none';document.getElementById('authConfirmField').style.display=mode==='register'?'block':'none';document.getElementById('authSubmitBtn').textContent=mode==='login'?'دخول':'تسجيل';document.getElementById('authSwitch').innerHTML=mode==='login'?'ليس لديك حساب؟ <a onclick="toggleAuthMode()">سجل الآن</a>':'لديك حساب بالفعل؟ <a onclick="toggleAuthMode()">سجل دخول</a>'}
+function setAuthModeUI(mode){authMode=mode;document.getElementById('authTitle').textContent=mode==='login'?'تسجيل الدخول':'إنشاء حساب';document.getElementById('authSubtitle').textContent=mode==='login'?'أدخل إيميلك وكلمة السر':'أدخل بياناتك للتسجيل';document.getElementById('authNameField').style.display=mode==='register'?'block':'none';document.getElementById('authConfirmField').style.display=mode==='register'?'block':'none';var arf=document.getElementById('authReferralField');if(arf)arf.style.display=mode==='register'?'block':'none';document.getElementById('authSubmitBtn').textContent=mode==='login'?'دخول':'تسجيل';document.getElementById('authSwitch').innerHTML=mode==='login'?'ليس لديك حساب؟ <a onclick="toggleAuthMode()">سجل الآن</a>':'لديك حساب بالفعل؟ <a onclick="toggleAuthMode()">سجل دخول</a>'}
 function openAuthModal(mode){mode=mode||'login';var top=navStack[navStack.length-1];setAuthModeUI(mode);document.getElementById('authForm').reset();if(top&&top.kind==='modal'&&top.ref==='authModal')return;openLayer({kind:'modal',ref:'authModal'})}
 function toggleAuthMode(){setAuthModeUI(authMode==='login'?'register':'login');document.getElementById('authForm').reset()}
-async function handleAuth(e){e.preventDefault();var email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value,btn=document.getElementById('authSubmitBtn');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جاري...';try{if(authMode==='register'){var nm=document.getElementById('authName').value.trim(),cf=document.getElementById('authConfirmPassword').value;if(!nm){showToast('يرجى إدخال الاسم');btn.disabled=false;btn.textContent='تسجيل';return}if(password.length<6){showToast('كلمة السر يجب أن تكون 6 أحرف على الأقل');btn.disabled=false;btn.textContent='تسجيل';return}if(password!==cf){showToast('كلمة السر غير متطابقة');btn.disabled=false;btn.textContent='تسجيل';return}var cred=await auth.createUserWithEmailAndPassword(email,password);await db.collection('users').doc(cred.user.uid).set({name:nm,email:email,phone:'',address:'',city:'',createdAt:new Date().toISOString(),blocked:false,loyaltyPoints:0});closeLayerProgrammatically();showToast('تم إنشاء الحساب بنجاح! 🎉');runPostAuth()}else{await auth.signInWithEmailAndPassword(email,password);closeLayerProgrammatically();showToast('تم تسجيل الدخول بنجاح! 👋');runPostAuth()}}catch(err){showToast(fbErr(err))}finally{btn.disabled=false;btn.textContent=authMode==='login'?'دخول':'تسجيل'}}
+async function handleAuth(e){e.preventDefault();var email=document.getElementById('authEmail').value.trim(),password=document.getElementById('authPassword').value,btn=document.getElementById('authSubmitBtn');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جاري...';try{if(authMode==='register'){var nm=document.getElementById('authName').value.trim(),cf=document.getElementById('authConfirmPassword').value;if(!nm){showToast('يرجى إدخال الاسم');btn.disabled=false;btn.textContent='تسجيل';return}if(password.length<6){showToast('كلمة السر يجب أن تكون 6 أحرف على الأقل');btn.disabled=false;btn.textContent='تسجيل';return}if(password!==cf){showToast('كلمة السر غير متطابقة');btn.disabled=false;btn.textContent='تسجيل';return}var refInput=document.getElementById('authReferralCode'),refCode=refInput?refInput.value.trim().toUpperCase():'';var cred=await auth.createUserWithEmailAndPassword(email,password);var newUserDoc={name:nm,email:email,phone:'',address:'',city:'',createdAt:new Date().toISOString(),blocked:false,loyaltyPoints:0};if(typeof genReferralCode==='function'){newUserDoc.referralCode=genReferralCode(cred.user.uid);if(refCode&&refCode!==newUserDoc.referralCode){newUserDoc.referredByCode=refCode;newUserDoc.referredByProcessed=false}}await db.collection('users').doc(cred.user.uid).set(newUserDoc);closeLayerProgrammatically();showToast('تم إنشاء الحساب بنجاح! 🎉'+(newUserDoc.referredByCode?' وتم تسجيل كود الدعوة، هتوصلك مكافأتك بعد ما تتأكد 🎁':''));runPostAuth()}else{await auth.signInWithEmailAndPassword(email,password);closeLayerProgrammatically();showToast('تم تسجيل الدخول بنجاح! 👋');runPostAuth()}}catch(err){showToast(fbErr(err))}finally{btn.disabled=false;btn.textContent=authMode==='login'?'دخول':'تسجيل'}}
 function isProbablyValidEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(e||'').trim())}
 function getAuthResetError(e){var code=e&&e.code||'';var map={'auth/invalid-email':'البريد الإلكتروني غير صحيح. تأكد من كتابته بشكل سليم.','auth/user-not-found':'لا يوجد حساب مسجل بهذا البريد الإلكتروني. تأكد من الإيميل أو أنشئ حسابًا جديدًا.','auth/too-many-requests':'محاولات كثيرة جدًا. انتظر دقيقة أو اثنين ثم حاول مرة أخرى.','auth/quota-exceeded':'تم تجاوز حد إرسال رسائل إعادة التعيين مؤقتًا. جرب لاحقًا أو تواصل معنا عبر واتساب.','auth/operation-not-allowed':'خدمة إعادة تعيين كلمة السر غير مفعلة من Firebase Console.','auth/network-request-failed':'مشكلة في الاتصال بالإنترنت. تأكد من الشبكة ثم حاول مرة أخرى.','auth/internal-error':'خطأ مؤقت من Firebase. جرب بعد قليل.','auth/missing-email':'أدخل البريد الإلكتروني أولًا.','auth/invalid-continue-uri':'رابط الموقع الحالي غير صالح لإعادة التعيين. يجب نشر الموقع على رابط HTTPS صحيح.','auth/unauthorized-continue-uri':'هذا الدومين غير مسموح به في Firebase. أضفه من Authentication > Settings > Authorized Domains.','auth/redirect-handler-not-found':'تعذر فتح رابط إعادة التعيين. جرّب فتح الرسالة من نفس الجهاز والمتصفح الذي استخدمته للتسجيل.'};return map[code]||fbErr(e)}
 async function forgotPassword(){var emailEl=document.getElementById('authEmail');var email=String(emailEl&&emailEl.value||'').trim();if(!email){showToast('اكتب بريدك الإلكتروني في خانة الإيميل أولًا');if(emailEl)emailEl.focus();return}if(!isProbablyValidEmail(email)){showToast('صيغة البريد الإلكتروني غير صحيحة');return}var host=location.hostname||'';var isLocalTest=(host==='localhost'||host==='127.0.0.1'||host==='[::1]');if(location.protocol!=='https:'&&!isLocalTest){showToast('تنبيه: استعادة كلمة السر تحتاج نشر الموقع على رابط HTTPS حقيقي. جرّب واتساب للاستعادة اليدوية.');console.warn('VAYRO reset warning: site is not HTTPS',location.href);return}var continueUrl=location.origin+location.pathname;try{await auth.sendPasswordResetEmail(email,{url:continueUrl,handleCodeInApp:false});showToast('تم إرسال رابط إعادة تعيين كلمة السر ✓ تفقد Inbox و Spam خلال دقيقتين');console.log('VAYRO reset email sent to:',email)}catch(e){console.warn('VAYRO reset error:',e);var code=e&&e.code||'';var msg=getAuthResetError(e);showToast(msg);if(code==='auth/user-not-found'){setTimeout(function(){try{setAuthModeUI('register');var em=document.getElementById('authEmail');if(em)em.value=email;var pw=document.getElementById('authPassword');if(pw)pw.focus();showToast('لا يوجد حساب بهذا الإيميل — فتحنا لك نموذج التسجيل')}catch(err){console.warn('switch to register failed',err)}},800)}}}
@@ -2346,7 +2376,7 @@ async function deleteAdminCategory(id){if(!await showConfirm('حذف القسم�
 function resetAdminCategoryForm(){editingCategoryId=null;tempCategoryImage=undefined;document.getElementById('adminCatName').value='';document.getElementById('adminCatIcon').value='fa-box';document.getElementById('adminCatDescription').value='';document.getElementById('adminCatImageFile').value='';document.getElementById('categoryImagePreview').innerHTML='';document.getElementById('adminCategoryFormTitle').textContent='إضافة قسم';document.getElementById('adminCategoryBtn').innerHTML='<i class="fas fa-plus"></i> إضافة القسم'}
 /* ---- admin orders ---- */
 function adminOrderMatches(o){var q=String(adminOrderSearchQuery||'').trim().toLowerCase();if(adminOrderFilter!=='all'&&(o.status||'جديد')!==adminOrderFilter)return false;if(!q)return true;var c=o.customer||{};return String(o.id||'').toLowerCase().indexOf(q)!==-1||String(c.name||'').toLowerCase().indexOf(q)!==-1||String(c.phone||'').toLowerCase().indexOf(q)!==-1||String(c.city||'').toLowerCase().indexOf(q)!==-1}
-function renderAdminOrders(){var l=document.getElementById('adminOrdersList');if(!l)return;var arr=orders.filter(adminOrderMatches),countEl=document.getElementById('adminOrderCount');if(countEl)countEl.textContent=arr.length+' طلب من '+orders.length;if(!arr.length){l.innerHTML=orders.length?'<p style="color:var(--text-secondary);text-align:center;padding:2rem">لا توجد طلبات مطابقة للبحث أو الفلتر</p>':'<p style="color:var(--text-secondary);text-align:center;padding:2rem">لا توجد طلبات</p>';return}var html='',i;for(i=0;i<arr.length;i++){var o=arr[i],meta=STAGE_META[o.status]||STAGE_META['جديد'],c=o.customer||{},giftTag=(o.gift&&o.gift.enabled)?' <span class="gift-badge"><i class="fas fa-gift"></i> هدية</span>':'';html+='<div class="admin-item admin-order-item" data-order-id="'+esc(o.id)+'"><div class="admin-item-info"><div class="admin-item-name">'+esc(o.id)+giftTag+' <span style="background:'+meta.color+';color:'+(o.status==='جديد'?'var(--bg-primary)':'#fff')+';padding:.15rem .6rem;border-radius:12px;font-size:.68rem;margin-right:.4rem">'+esc(meta.label)+'</span></div><div class="admin-item-detail">'+esc(c.name||'')+' - '+esc(c.phone||'')+'</div><div class="admin-item-detail">'+esc(o.date)+' - '+esc(o.paymentName||'')+'</div><div class="admin-item-detail" style="color:var(--success);font-weight:700">الإجمالي: '+(o.total||0).toFixed(0)+' ج.م | الربح: '+(o.profit||0).toFixed(0)+' ج.م</div></div><div class="admin-item-actions order-actions"><button type="button" class="admin-btn-small view" data-order-view="'+esc(o.id)+'" title="عرض"><i class="fas fa-eye"></i></button><button type="button" class="admin-btn-small edit" data-invoice-order="'+esc(o.id)+'" title="فاتورة PDF"><i class="fas fa-file-pdf"></i></button><button type="button" class="admin-btn-small view" data-print-invoice="'+esc(o.id)+'" title="طباعة"><i class="fas fa-print"></i></button><button type="button" class="admin-btn-small delete" data-order-delete="'+esc(o.id)+'" title="حذف"><i class="fas fa-trash"></i></button></div></div>'}l.innerHTML=html}
+function renderAdminOrders(){var l=document.getElementById('adminOrdersList');if(!l)return;var arr=orders.filter(adminOrderMatches),countEl=document.getElementById('adminOrderCount');if(countEl)countEl.textContent=arr.length+' طلب من '+orders.length;if(!arr.length){l.innerHTML=orders.length?'<p style="color:var(--text-secondary);text-align:center;padding:2rem">لا توجد طلبات مطابقة للبحث أو الفلتر</p>':'<p style="color:var(--text-secondary);text-align:center;padding:2rem">لا توجد طلبات</p>';return}var html='',i;for(i=0;i<arr.length;i++){var o=arr[i],meta=STAGE_META[o.status]||STAGE_META['جديد'],c=o.customer||{},giftTag=(o.gift&&o.gift.enabled)?' <span class="gift-badge"><i class="fas fa-gift"></i> هدية</span>':'';html+='<div class="admin-item admin-order-item" data-order-id="'+esc(o.id)+'"><div class="admin-item-info"><div class="admin-item-name">#'+esc(o.id)+giftTag+'</div><div class="admin-item-detail"><span style="background:'+meta.color+';color:'+(o.status==='جديد'?'var(--bg-primary)':'#fff')+';padding:.2rem .7rem;border-radius:12px;font-size:.72rem;font-weight:700;display:inline-block">'+esc(meta.label)+'</span></div><div class="admin-item-detail"><i class="fas fa-user" style="width:16px;color:var(--text-muted)"></i> '+esc(c.name||'')+' - '+esc(c.phone||'')+'</div><div class="admin-item-detail"><i class="fas fa-calendar" style="width:16px;color:var(--text-muted)"></i> '+esc(o.date)+' - '+esc(o.paymentName||'')+'</div><div class="admin-item-detail" style="color:var(--success);font-weight:700"><i class="fas fa-sack-dollar" style="width:16px;color:var(--text-muted)"></i> الإجمالي: '+(o.total||0).toFixed(0)+' ج.م | الربح: '+(o.profit||0).toFixed(0)+' ج.م</div></div><div class="admin-item-actions user-actions"><button type="button" class="admin-btn-small view" data-order-view="'+esc(o.id)+'" title="عرض"><i class="fas fa-eye"></i></button><button type="button" class="admin-btn-small edit" data-invoice-order="'+esc(o.id)+'" title="فاتورة PDF"><i class="fas fa-file-pdf"></i></button><button type="button" class="admin-btn-small view" data-print-invoice="'+esc(o.id)+'" title="طباعة"><i class="fas fa-print"></i></button><button type="button" class="admin-btn-small delete" data-order-delete="'+esc(o.id)+'" title="حذف"><i class="fas fa-trash"></i></button></div></div>'}l.innerHTML=html}
 async function deleteAdminOrder(id){if(!await showConfirm('حذف الطلب؟','سيتم حذف الطلب نهائياَ من السجلات.'))return;var o=orders.find(function(x){return x.id===id});try{await db.collection('orders').doc(id).delete();orders=orders.filter(function(x){return x.id!==id});renderAdminOrders();renderAdminStats();renderReports();updateNewOrdersBadge();if(o)logAdminAction('delete','orders','حذف طلب',o.id,(o.customer&&o.customer.name)||o.id,'الإجمالي: '+(o.total||0).toFixed(0)+' ج.م | الحالة: '+(o.status||''));showToast('تم الحذف')}catch(e){showToast(fbErr(e))}}
 function exportOrdersCSV(){if(orders.length===0){showToast('لا توجد طلبات للتصدير');return}var headers=['رقم الطلب','التاريخ','اسم العميل','الموبايل','العنوان','المحافظة','ملاحظات','هدية','مستلم الهدية','رسالة الهدية','طريقة الدفع','الشحن معروف','الشحن مجاني','المجموع الفرعي','الخصم','الشحن','الإجمالي','التكلفة','الربح','النقاط المستخدمة','الحالة','المنتجات'];function escCsv(v){return'"'+String(v==null?'':v).replace(/"/g,'""')+'"'}var rows=[headers],i;for(i=0;i<orders.length;i++){var o=orders[i],c=o.customer||{},g=o.gift||{},items=[],j;for(j=0;j<(o.items||[]).length;j++){var it=o.items[j];items.push(it.name+(it.color?' ('+it.color+')':'')+(it.size?' ['+it.size+']':'')+' x'+it.quantity)}rows.push([o.id,o.date,c.name||'',c.phone||'',c.address||'',c.city||'',c.notes||'',g.enabled?'نعم':'لا',g.recipient||'',g.message||'',o.paymentName||'',o.shippingKnown===false?'يُحدد لاحقاَ':'نعم',o.shippingFree?'نعم':'لا',o.subtotal||0,o.discount||0,o.shipping||0,o.total||0,o.cost||0,o.profit||0,o.loyaltyUsed||0,o.status||'',items.join(' | ')])}var csv='\uFEFF'+rows.map(function(r){return r.map(escCsv).join(',')}).join('\r\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='VAYRO-orders-'+new Date().toISOString().slice(0,10)+'.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000);showToast('تم تصدير الطلبات ✓')}
 /* ---- admin reviews / users ---- */
@@ -2506,7 +2536,6 @@ if(el=t.closest('[data-img-primary]')){setPrimaryProductImage(parseInt(el.datase
 if(el=t.closest('[data-img-remove]')){removeProductImage(parseInt(el.dataset.imgRemove,10));return}
 if(el=t.closest('[data-review-image-remove]')){removeReviewImage(parseInt(el.dataset.reviewImageRemove,10));return}
 if(el=t.closest('[data-cat-image-remove]')){removeCategoryImage();return}
-if(el=t.closest('[data-bundle-image-remove]')){removeBundleImage();return}
 if(el=t.closest('[data-track-wa]')){trackOrderWhatsApp();return}
 if(el=t.closest('[data-track-reorder]')){trackReorder();return}
 if(el=t.closest('[data-track-home]')){resetToHome();return}
@@ -2771,8 +2800,18 @@ console.log('VAYRO Cart Cloud Sync v2 loaded ✓');
 (function(){
 
 var editingBundleId=null,tempBundleImage=undefined;
+
+/* ---- رفع صورة الباقة من الجهاز (نفس أسلوب رفع صورة القسم) ---- */
+async function handleBundleImageUpload(ev){
+  var f=ev.target.files[0];ev.target.value='';
+  if(!f)return;
+  if(f.type.indexOf('image/')!==0){showToast('يرجى اختيار صورة فقط');return}
+  var r=await compressImage(f,600,.7);
+  if(!r)return;
+  tempBundleImage=r;
+  document.getElementById('bundleImagePreview').innerHTML='<div class="uploaded-preview"><img src="'+esc(r)+'"><button type="button" class="remove-img" data-bundle-image-remove="1"><i class="fas fa-times"></i></button></div>';
+}
 function removeBundleImage(){tempBundleImage=null;document.getElementById('bundleImagePreview').innerHTML=''}
-async function handleBundleImageUpload(ev){var f=ev.target.files[0];ev.target.value='';if(!f)return;if(f.type.indexOf('image/')!==0){showToast('يرجى اختيار صورة فقط');return}var r=await compressImage(f,600,.7);if(!r)return;tempBundleImage=r;document.getElementById('bundleImagePreview').innerHTML='<div class="uploaded-preview"><img src="'+esc(r)+'"><button type="button" class="remove-img" data-bundle-image-remove="1"><i class="fas fa-times"></i></button></div>'}
 
 /* ---- حساب الباقة ---- */
 function bundleProducts(b){
@@ -2841,6 +2880,8 @@ document.addEventListener('click',function(e){
   if(eb){openBundleForEdit(eb.getAttribute('data-bundle-edit'));return}
   var delb=e.target.closest('[data-bundle-delete]');
   if(delb){deleteAdminBundle(delb.getAttribute('data-bundle-delete'));return}
+  var rmImg=e.target.closest('[data-bundle-image-remove]');
+  if(rmImg){removeBundleImage();return}
 });
 document.addEventListener('change',function(e){
   if(e.target&&e.target.id==='adminBundleDiscType')updateBundleDiscLabel();
@@ -2879,15 +2920,16 @@ function openBundleForEdit(id){
   var b=bundles.find(function(x){return x.id===id});
   if(!b)return;
   editingBundleId=id;
+  tempBundleImage=undefined;
   document.getElementById('adminBundleName').value=b.name||'';
   document.getElementById('adminBundleDesc').value=b.description||'';
-  tempBundleImage=undefined;
-  document.getElementById('bundleImagePreview').innerHTML=b.image?'<div class="uploaded-preview"><img src="'+esc(b.image)+'"><button type="button" class="remove-img" data-bundle-image-remove="1"><i class="fas fa-times"></i></button></div>':'';
   document.getElementById('adminBundleDiscType').value=b.discountType||'percent';
   document.getElementById('adminBundleDiscValue').value=b.discountValue||'';
   document.getElementById('adminBundleActive').checked=b.active!==false;
   document.getElementById('adminBundleFormTitle').textContent='تعديل باقة';
   document.getElementById('adminBundleBtn').innerHTML='<i class="fas fa-save"></i> حفظ التعديلات';
+  if(b.image)document.getElementById('bundleImagePreview').innerHTML='<div class="uploaded-preview"><img src="'+esc(b.image)+'"><button type="button" class="remove-img" data-bundle-image-remove="1"><i class="fas fa-times"></i></button></div>';
+  else document.getElementById('bundleImagePreview').innerHTML='';
   updateBundleDiscLabel();
   populateBundleProductsCheck(b.productIds||[]);
   var sec=document.getElementById('adminBundlesTab');
@@ -2973,8 +3015,206 @@ window.saveAdminBundle=saveAdminBundle;
 window.resetAdminBundleForm=resetAdminBundleForm;
 window.deleteAdminBundle=deleteAdminBundle;
 window.openBundleForEdit=openBundleForEdit;
+window.handleBundleImageUpload=handleBundleImageUpload;
 
 console.log('VAYRO Bundles module loaded ✓');
+})();
+</script>
+<script>
+/* ============================================================
+   VAYRO GROWTH — نظام الإحالة + مستويات VIP + بطاقات الهدايا + Cross-sell
+   ============================================================ */
+(function(){
+
+/* ===================== 1) مستويات VIP ===================== */
+var VIP_TIERS=[
+  {key:'bronze',name:'Bronze',icon:'🥉',min:0,freeShip:false,earnMult:1},
+  {key:'silver',name:'Silver',icon:'🥈',min:500,freeShip:false,earnMult:1.1},
+  {key:'gold',name:'Gold',icon:'🥇',min:1500,freeShip:true,earnMult:1.25},
+  {key:'platinum',name:'Platinum',icon:'👑',min:3000,freeShip:true,earnMult:1.5}
+];
+function currentTier(pts){pts=Number(pts)||0;var t=VIP_TIERS[0],i;for(i=0;i<VIP_TIERS.length;i++){if(pts>=VIP_TIERS[i].min)t=VIP_TIERS[i]}return t}
+function nextTier(pts){var cur=currentTier(pts),idx=VIP_TIERS.indexOf(cur);return VIP_TIERS[idx+1]||null}
+
+/* شحن مجاني تلقائي لأعضاء Gold/Platinum */
+var _origGetEffectiveShipping=window.getEffectiveShipping;
+if(typeof _origGetEffectiveShipping==='function'){
+  window.getEffectiveShipping=function(city,net){
+    var r=_origGetEffectiveShipping(city,net);
+    if(currentUser&&loyaltyEnabled&&loyaltyEnabled()){
+      var t=currentTier(userPoints());
+      if(t.freeShip&&!r.free)return Object.assign({},r,{shipping:0,free:true,remaining:0,vipFreeShip:true});
+    }
+    return r;
+  };
+}
+/* نقاط ولاء إضافية حسب المستوى */
+var _origLoyaltyEarnRate=window.loyaltyEarnRate;
+if(typeof _origLoyaltyEarnRate==='function'){
+  window.loyaltyEarnRate=function(){
+    var base=_origLoyaltyEarnRate();
+    if(currentUser){var t=currentTier(userPoints());return base*(t.earnMult||1)}
+    return base;
+  };
+}
+
+/* ===================== 2) نظام الإحالة ===================== */
+function genReferralCode(uid){
+  var s=(uid||Math.random().toString(36)).replace(/[^a-zA-Z0-9]/g,'').toUpperCase(),hash=0,i;
+  for(i=0;i<s.length;i++)hash=(hash*31+s.charCodeAt(i))>>>0;
+  return 'V'+(100000+(hash%900000));
+}
+
+function renderReferralCard(){
+  var slot=document.getElementById('referralCardSlot');
+  if(!slot)return;
+  if(!currentUser){slot.innerHTML='';return}
+  var code=currentUser.referralCode;
+  if(!code){slot.innerHTML='';return}
+  var link=location.origin+location.pathname+'#ref='+code;
+  slot.innerHTML='<div class="referral-card"><div style="font-weight:900;color:var(--gold)"><i class="fas fa-user-friends"></i> ادعُ صديق واكسبوا نقاط مع بعض</div><div style="font-size:.78rem;color:var(--text-secondary);margin-top:.3rem">صاحبك ياخد 100 نقطة وانت تاخد 200 نقطة أول ما طلبه الأول يتسلّم</div><div class="rc-code-row"><div class="rc-code">'+esc(code)+'</div><button type="button" class="rc-btn" data-ref-share="'+esc(link)+'"><i class="fab fa-whatsapp"></i></button></div></div>';
+}
+
+/* عند تسليم أول طلب لعميل مُحال: مكافأة الطرفين */
+function chain(name,after,flag){if(window[flag])return;var orig=window[name];if(typeof orig!=='function')return;window[name]=function(){var r=orig.apply(this,arguments);try{var p=after.apply(null,arguments);if(p&&p.catch)p.catch(function(e){console.warn(e)})}catch(e){console.warn(e)}return r};window[flag]=true}
+
+chain('changeOrderStatus',async function(id,st){
+  if(st!=='تم التسليم')return;
+  var o=orders.find(function(x){return x.id===id});
+  if(!o||!o.uid)return;
+  var u=users.find(function(x){return x.id===o.uid});
+  if(!u||!u.referredByCode||u.referredByProcessed)return;
+  var referrer=users.find(function(x){return x.referralCode===u.referredByCode});
+  var refereeBonus=100,referrerBonus=200;
+  try{
+    await db.collection('users').doc(u.id).update({loyaltyPoints:FV.increment(refereeBonus),referredByProcessed:true});
+    u.loyaltyPoints=(Number(u.loyaltyPoints)||0)+refereeBonus;u.referredByProcessed=true;
+    if(currentUser&&currentUser.uid===u.id)currentUser.loyaltyPoints=u.loyaltyPoints;
+    if(referrer){
+      await db.collection('users').doc(referrer.id).update({loyaltyPoints:FV.increment(referrerBonus)});
+      referrer.loyaltyPoints=(Number(referrer.loyaltyPoints)||0)+referrerBonus;
+      if(currentUser&&currentUser.uid===referrer.id)currentUser.loyaltyPoints=referrer.loyaltyPoints;
+    }
+    logAdminAction('update','referrals','مكافأة إحالة',u.id,u.name,'+'+refereeBonus+' نقطة للمُحال'+(referrer?'، +'+referrerBonus+' نقطة لـ'+referrer.name:''));
+    renderAdminReferrals();renderProfile();
+    showToast('تم صرف مكافأة الإحالة 🎁');
+  }catch(e){console.warn(e)}
+},'_refReward');
+
+/* دعم رابط الدعوة #ref=CODE */
+chain('handleDeepLink',function(){
+  try{
+    var h=location.hash||'',m;
+    if((m=h.match(/ref=([^&]+)/))){
+      var code=decodeURIComponent(m[1]).trim().toUpperCase();
+      if(code&&!currentUser){
+        retryWhen(function(){openAuthModal('register');var inp=document.getElementById('authReferralCode');if(inp)inp.value=code;return true},8,300);
+      }
+    }
+  }catch(e){}
+},'_refDeepLink');
+
+/* ضمان وجود كود إحالة لأي مستخدم حالي حتى لو اتسجل قبل إضافة النظام ده */
+chain('renderProfile',function(){
+  renderReferralCard();
+  if(currentUser&&!currentUser.referralCode){
+    var code=genReferralCode(currentUser.uid);
+    currentUser.referralCode=code;
+    db.collection('users').doc(currentUser.uid).update({referralCode:code}).then(function(){renderReferralCard()}).catch(function(){});
+  }
+},'_refProfile');
+
+/* ---- لوحة الماستر: تبويب الإحالات ---- */
+function renderAdminReferrals(){
+  var statsEl=document.getElementById('adminReferralsStats'),listEl=document.getElementById('adminReferralsList');
+  if(!statsEl||!listEl)return;
+  var withCode=users.filter(function(u){return u.referralCode}),totalReferred=users.filter(function(u){return u.referredByCode}).length,totalRewarded=users.filter(function(u){return u.referredByProcessed}).length;
+  statsEl.innerHTML='<div class="stat-card"><div style="font-size:1.6rem;font-weight:900;color:var(--gold)">'+totalReferred+'</div><div style="font-size:.78rem;color:var(--text-secondary)">عملاء جم بالإحالة</div></div><div class="stat-card"><div style="font-size:1.6rem;font-weight:900;color:var(--success)">'+totalRewarded+'</div><div style="font-size:.78rem;color:var(--text-secondary)">مكافآت اتصرفت</div></div>';
+  if(!withCode.length){listEl.innerHTML='<p style="color:var(--text-secondary);text-align:center;padding:2rem">لا يوجد مستخدمين بعد</p>';return}
+  var html='',i;
+  for(i=0;i<withCode.length;i++){
+    var u=withCode[i],referredList=users.filter(function(x){return x.referredByCode===u.referralCode}),rewarded=referredList.filter(function(x){return x.referredByProcessed}).length;
+    if(!referredList.length)continue;
+    html+='<div class="admin-item"><div class="admin-item-info"><div class="admin-item-name">'+esc(u.name)+' — كود: '+esc(u.referralCode)+'</div><div class="admin-item-detail">أحال '+referredList.length+' عميل | اتصرفت مكافأة '+rewarded+' منهم</div></div></div>';
+  }
+  listEl.innerHTML=html||'<p style="color:var(--text-secondary);text-align:center;padding:2rem">لسه مفيش إحالات فعلية</p>';
+}
+
+/* ===================== 3) بطاقات الهدايا ===================== */
+function genGiftCode(){
+  var chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s='',i;
+  for(i=0;i<6;i++)s+=chars.charAt(Math.floor(Math.random()*chars.length));
+  return 'GIFT-'+s;
+}
+async function generateGiftCard(){
+  var vl=parseFloat(document.getElementById('giftCardValue').value),rec=document.getElementById('giftCardRecipient').value.trim();
+  if(!vl||vl<=0){showToast('يرجى إدخال قيمة صحيحة');return}
+  var code=genGiftCode();
+  while(discountCodes.find(function(c){return c.code===code}))code=genGiftCode();
+  var d={id:Date.now().toString(),code:code,type:'fixed',value:vl,limit:1,used:0,expiry:'2099-12-31',isGiftCard:true,recipientNote:rec};
+  try{
+    discountCodes.push(d);
+    await db.collection('discountCodes').doc(d.id).set(d);
+    logAdminAction('create','giftcards','إنشاء بطاقة هدية',d.id,d.code,'القيمة: '+vl+' ج.م'+(rec?' | لـ: '+rec:''));
+    document.getElementById('giftCardValue').value='';document.getElementById('giftCardRecipient').value='';
+    renderAdminGiftCards();
+    showToast('تم إنشاء البطاقة: '+code);
+  }catch(e){showToast(fbErr(e))}
+}
+function renderAdminGiftCards(){
+  var l=document.getElementById('adminGiftCardsList');
+  if(!l)return;
+  var cards=discountCodes.filter(function(c){return c.isGiftCard});
+  if(!cards.length){l.innerHTML='<p style="color:var(--text-secondary);text-align:center;padding:2rem">لا توجد بطاقات هدايا بعد</p>';return}
+  var html='',i;
+  for(i=0;i<cards.length;i++){
+    var c=cards[i],used=Number(c.used)>=Number(c.limit);
+    html+='<div class="admin-item"><div class="admin-item-info"><div class="admin-item-name">'+esc(c.code)+' <span style="color:'+(used?'var(--text-muted)':'var(--success)')+';font-size:.72rem">'+(used?'(مستخدمة)':'(متاحة)')+'</span></div><div class="admin-item-detail">القيمة: '+c.value+' ج.م'+(c.recipientNote?' | لـ: '+esc(c.recipientNote):'')+'</div></div><div class="admin-item-actions"><button type="button" class="admin-btn-small view" data-giftcard-copy="'+esc(c.code)+'" title="نسخ الكود"><i class="fas fa-copy"></i></button></div></div>';
+  }
+  l.innerHTML=html;
+}
+
+/* ===================== 4) Cross-sell في السلة ===================== */
+function renderCrossSell(){
+  var sec=document.getElementById('cartCrossSellSection');
+  if(!sec)return;
+  if(!cart.length){sec.style.display='none';sec.innerHTML='';return}
+  var cartIds={},cartCats={};
+  cart.forEach(function(it){cartIds[it.id]=true;var p=products.find(function(x){return x.id===it.id});if(p&&p.category)cartCats[p.category]=true});
+  var cats=Object.keys(cartCats);
+  var suggestions=products.filter(function(p){return !cartIds[p.id]&&cats.indexOf(p.category)!==-1&&!getStockInfo(p).out}).slice(0,8);
+  if(!suggestions.length){sec.style.display='none';sec.innerHTML='';return}
+  var html='<div class="section-header" style="padding:0 1.5rem;margin-bottom:.6rem"><div class="section-title" style="font-size:.95rem">أكمل إطلالتك مع</div></div><div class="cross-sell-row">',i;
+  for(i=0;i<suggestions.length;i++){
+    var p=suggestions[i];
+    html+='<div class="cross-sell-card"><img src="'+esc(getPrimaryImage(p)||PH)+'" onerror="this.src=\''+esc(PH)+'\'" loading="lazy"><div class="cs-name">'+esc(p.name)+'</div><div class="cs-price">'+getFinalPrice(p).toFixed(0)+' ج.م</div><button type="button" data-cs-add="'+esc(p.id)+'">أضف للسلة</button></div>';
+  }
+  html+='</div>';
+  sec.innerHTML=html;
+  sec.style.display='block';
+}
+chain('renderCart',function(){renderCrossSell()},'_csCart');
+
+/* ===================== أحداث مشتركة ===================== */
+document.addEventListener('click',function(e){
+  var rs=e.target.closest('[data-ref-share]');
+  if(rs){var link=rs.getAttribute('data-ref-share');window.open('https://wa.me/?text='+encodeURIComponent('انضم لـ VAYRO وخد خصم مع أول طلب ليك! 🎁\n'+link),'_blank');return}
+  var gc=e.target.closest('[data-giftcard-copy]');
+  if(gc){var code=gc.getAttribute('data-giftcard-copy');if(navigator.clipboard)navigator.clipboard.writeText(code).then(function(){showToast('تم نسخ الكود')});return}
+  var cs=e.target.closest('[data-cs-add]');
+  if(cs){addToCart(cs.getAttribute('data-cs-add'),cs);return}
+});
+
+chain('switchAdminTab',function(tab){if(tab==='referrals')renderAdminReferrals();if(tab==='giftcards')renderAdminGiftCards()},'_growthTabs');
+
+window.currentTier=currentTier;
+window.nextTier=nextTier;
+window.genReferralCode=genReferralCode;
+window.generateGiftCard=generateGiftCard;
+window.renderAdminReferrals=renderAdminReferrals;
+window.renderAdminGiftCards=renderAdminGiftCards;
+
+console.log('VAYRO Growth module loaded ✓');
 })();
 </script>
 </body>
